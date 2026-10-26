@@ -436,7 +436,7 @@ const handleCategoryClick = (category) => {
   </form>
 ) : (
   <p className="profile-note">
-    Booking and direct messaging will be added in a later phase.
+   
   </p>
 )}
               </div>
