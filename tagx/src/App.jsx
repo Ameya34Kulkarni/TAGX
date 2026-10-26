@@ -7,9 +7,12 @@ function App() {
   const [search, setSearch] = useState('')
   const [selectedCreator, setSelectedCreator] = useState(null)
   const [showContactForm, setShowContactForm] = useState(false)
-  const [showSignIn, setShowSignIn] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+ const [showSignIn, setShowSignIn] = useState(false)
+const [authMode, setAuthMode] = useState('signin')
+const [fullName, setFullName] = useState('')
+const [email, setEmail] = useState('')
+const [password, setPassword] = useState('')
+const [authMessage, setAuthMessage] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
   const [authError, setAuthError] = useState('')
   const [signedInUser, setSignedInUser] = useState(null)
@@ -34,6 +37,7 @@ function App() {
   const handleSignIn = async (event) => {
     event.preventDefault()
     setAuthError('')
+    setAuthMessage('')
     setAuthLoading(true)
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -52,7 +56,41 @@ function App() {
     setShowSignIn(false)
     setPassword('')
   }
+const handleSignUp = async (event) => {
+  event.preventDefault()
 
+  setAuthError('')
+  setAuthMessage('')
+  setAuthLoading(true)
+
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: {
+      data: {
+        full_name: fullName.trim(),
+      },
+    },
+  })
+
+  setAuthLoading(false)
+
+  if (error) {
+    setAuthError(error.message)
+    return
+  }
+
+  setPassword('')
+
+  if (data.session && data.user) {
+    setSignedInUser(data.user)
+    setShowSignIn(false)
+  } else {
+    setAuthMessage(
+      'Account created! Please check your email to verify your account.'
+    )
+  }
+}
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (error) {
@@ -223,7 +261,10 @@ const handleCategoryClick = (category) => {
             <button
               className="auth-nav-button"
               onClick={() => {
+                setAuthMode('signin')
                 setAuthError('')
+                setAuthMessage('')
+                setPassword('')
                 setShowSignIn(true)
               }}
             >
@@ -241,25 +282,39 @@ const handleCategoryClick = (category) => {
             if (event.target === event.currentTarget) setShowSignIn(false)
           }}
         >
-          <section
-            className="auth-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="signin-heading"
-          >
+          <section className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="signin-heading">
             <button
               className="auth-close-button"
               type="button"
-              aria-label="Close sign in"
+              aria-label="Close authentication dialog"
               onClick={() => setShowSignIn(false)}
             >
               ×
             </button>
             <p className="eyebrow">TAGX / MEMBER ACCESS</p>
-            <h2 id="signin-heading">Welcome back.</h2>
-            <p className="auth-description">Sign in to your TAGX account.</p>
+            <h2 id="signin-heading">{authMode === 'signup' ? 'Join TAGX.' : 'Welcome back.'}</h2>
+            <p className="auth-description">
+              {authMode === 'signup'
+                ? 'Create an account to get started with TAGX.'
+                : 'Sign in to your TAGX account.'}
+            </p>
 
-            <form className="auth-form" onSubmit={handleSignIn}>
+            <form className="auth-form" onSubmit={authMode === 'signup' ? handleSignUp : handleSignIn}>
+              {authMode === 'signup' && (
+                <>
+                  <label htmlFor="signup-full-name">Full name</label>
+                  <input
+                    id="signup-full-name"
+                    type="text"
+                    autoComplete="name"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    required
+                  />
+                </>
+              )}
+
               <label htmlFor="signin-email">Email address</label>
               <input
                 id="signin-email"
@@ -275,20 +330,44 @@ const handleCategoryClick = (category) => {
               <input
                 id="signin-password"
                 type="password"
-                autoComplete="current-password"
-                placeholder="Enter your password"
+                autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
+                placeholder={authMode === 'signup' ? 'Create a password (at least 6 characters)' : 'Enter your password'}
+                minLength={authMode === 'signup' ? 6 : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
               />
 
               {authError && <p className="auth-error" role="alert">{authError}</p>}
+              {authMessage && <p className="auth-message" role="status">{authMessage}</p>}
 
               <button className="auth-submit-button" type="submit" disabled={authLoading}>
-                {authLoading ? 'Signing in…' : 'Sign in ↗'}
+                {authLoading
+                  ? (authMode === 'signup' ? 'Creating account…' : 'Signing in…')
+                  : (authMode === 'signup' ? 'Create account ↗' : 'Sign in ↗')}
               </button>
             </form>
-            <p className="auth-footnote">Use the email and password created for you by TAGX.</p>
+
+            <p className="auth-switch">
+              {authMode === 'signup' ? 'Already have an account?' : 'New to TAGX?'}
+              <button
+                className="auth-mode-button"
+                type="button"
+                onClick={() => {
+                  setAuthMode(authMode === 'signup' ? 'signin' : 'signup')
+                  setAuthError('')
+                  setAuthMessage('')
+                  setPassword('')
+                }}
+              >
+                {authMode === 'signup' ? 'Sign in' : 'Create an account'}
+              </button>
+            </p>
+            <p className="auth-footnote">
+              {authMode === 'signup'
+                ? 'You may need to verify your email before signing in.'
+                : 'Use the email and password linked to your TAGX account.'}
+            </p>
           </section>
         </div>
       )}
