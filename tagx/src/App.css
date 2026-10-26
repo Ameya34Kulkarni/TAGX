@@ -48,7 +48,7 @@
   color: #b66f4b;
 }
 
-.
+
 .search-box button,
 .join-button {
   background: #C6A66B;
@@ -1512,4 +1512,38 @@ input:focus-visible {
   .contact-form h2 {
     font-size: 25px;
   }
+}
+/* TAGX Supabase sign-in screen — append these rules to src/App.css */
+.auth-loading-screen {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  padding: 32px;
+}
+.auth-gate { min-height: 100vh; display: flex; flex-direction: column; }
+.auth-navbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.auth-nav-label, .signed-in-label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.72; }
+.auth-main { flex: 1; display: grid; place-items: center; padding: 64px 24px; }
+.auth-card { width: min(100%, 460px); padding: clamp(28px, 5vw, 48px); border: 1px solid rgba(255,255,255,0.14); border-radius: 18px; background: rgba(255,255,255,0.035); box-shadow: 0 24px 80px rgba(0,0,0,0.18); }
+.auth-card h1 { margin: 12px 0; font-size: clamp(2.4rem, 7vw, 4rem); line-height: 1.05; }
+.auth-card h1 span { font-style: italic; }
+.auth-description, .auth-footnote { line-height: 1.7; opacity: 0.72; }
+.auth-form { display: grid; gap: 10px; margin-top: 28px; }
+.auth-form label { margin-top: 8px; font-size: 0.9rem; }
+.auth-form input { width: 100%; min-width: 0; box-sizing: border-box; padding: 14px 15px; border: 1px solid rgba(255,255,255,0.18); border-radius: 9px; background: rgba(0,0,0,0.18); color: inherit; font: inherit; }
+.auth-form input:focus { outline: 2px solid rgba(255,255,255,0.45); outline-offset: 2px; }
+.auth-submit, .sign-out-button { border: 1px solid rgba(255,255,255,0.24); border-radius: 9px; padding: 12px 16px; color: inherit; background: rgba(255,255,255,0.09); font: inherit; cursor: pointer; }
+.auth-submit { margin-top: 12px; width: 100%; }
+.auth-submit:disabled { opacity: 0.6; cursor: wait; }
+.auth-error { color: #ff9c9c; font-size: 0.9rem; line-height: 1.5; }
+.auth-footnote { margin-top: 20px; font-size: 0.82rem; }
+.auth-footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.account-actions { display: flex; align-items: center; gap: 12px; }
+.sign-out-button { padding: 8px 12px; font-size: 0.85rem; }
+@media (max-width: 640px) {
+  .auth-main { padding: 36px 16px; }
+  .auth-card { padding: 26px 20px; }
+  .account-actions { width: 100%; justify-content: space-between; }
+  .auth-navbar { flex-wrap: wrap; }
 }
