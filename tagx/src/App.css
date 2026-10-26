@@ -3366,11 +3366,11 @@ input:focus-visible {
   cursor: not-allowed;
 }
 
-/* TAGX: Keep Portraits and Stories visible on mobile */
+
 @media screen and (max-width: 600px) {
   .hero-art {
     display: grid !important;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
     gap: 12px;
     width: 100%;
