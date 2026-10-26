@@ -7,59 +7,59 @@ function App() {
   const [search, setSearch] = useState('')
   const [selectedCreator, setSelectedCreator] = useState(null)
   const [showContactForm, setShowContactForm] = useState(false)
-  const [session, setSession] = useState(null)
-  const [authLoading, setAuthLoading] = useState(true)
-  const [authEmail, setAuthEmail] = useState('')
-  const [authPassword, setAuthPassword] = useState('')
+  const [showSignIn, setShowSignIn] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authLoading, setAuthLoading] = useState(false)
   const [authError, setAuthError] = useState('')
-  const [signingIn, setSigningIn] = useState(false)
+  const [signedInUser, setSignedInUser] = useState(null)
 
   useEffect(() => {
-    let isMounted = true
+    let mounted = true
 
     supabase.auth.getSession().then(({ data, error }) => {
-      if (!isMounted) return
-      if (error) setAuthError('Unable to check your session. Please refresh and try again.')
-      setSession(data?.session ?? null)
-      setAuthLoading(false)
+      if (mounted && !error) setSignedInUser(data.session?.user ?? null)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession)
-      setAuthLoading(false)
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) setSignedInUser(session?.user ?? null)
     })
 
     return () => {
-      isMounted = false
-      subscription.unsubscribe()
+      mounted = false
+      authListener.subscription.unsubscribe()
     }
   }, [])
 
   const handleSignIn = async (event) => {
     event.preventDefault()
     setAuthError('')
-    setSigningIn(true)
+    setAuthLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: authEmail.trim(),
-      password: authPassword,
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
     })
 
-    if (error) {
-  console.error("Supabase login error:", error.message);
-  setAuthError(error.message);
-  setSigningIn(false);
-  return;
-}
+    setAuthLoading(false)
 
-    setSigningIn(false)
+    if (error) {
+      setAuthError(error.message)
+      return
+    }
+
+    setSignedInUser(data.user)
+    setShowSignIn(false)
+    setPassword('')
   }
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut()
-    if (error) setAuthError('Unable to sign out. Please try again.')
-    setSelectedCreator(null)
-    setShowContactForm(false)
+    if (error) {
+      setAuthError(error.message)
+      return
+    }
+    setSignedInUser(null)
   }
   const categories = [
     'Photography',
@@ -161,71 +161,6 @@ const handleCategoryClick = (category) => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  if (authLoading) {
-    return (
-      <div className="app auth-loading-screen">
-        <p className="eyebrow">TAGX / THE CREATIVE INDEX</p>
-        <p>Checking your sign-in…</p>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return (
-      <div className="app auth-gate">
-        <header className="navbar auth-navbar">
-          <a className="brand" href="#home">TAG<span>X</span></a>
-          <span className="auth-nav-label">PRIVATE ACCESS</span>
-        </header>
-
-        <main className="auth-main">
-          <section className="auth-card" aria-labelledby="auth-title">
-            <p className="eyebrow">TAGX / MEMBERS AREA</p>
-            <h1 id="auth-title">Welcome <span>back.</span></h1>
-            <p className="auth-description">Sign in with an account provided by the TAGX administrator.</p>
-
-            <form className="auth-form" onSubmit={handleSignIn}>
-              <label htmlFor="tagx-email">Email address</label>
-              <input
-                id="tagx-email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={authEmail}
-                onChange={(event) => setAuthEmail(event.target.value)}
-                required
-              />
-
-              <label htmlFor="tagx-password">Password</label>
-              <input
-                id="tagx-password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                value={authPassword}
-                onChange={(event) => setAuthPassword(event.target.value)}
-                required
-              />
-
-              {authError && <p className="auth-error" role="alert">{authError}</p>}
-
-              <button className="auth-submit" type="submit" disabled={signingIn}>
-                {signingIn ? 'Signing in…' : 'Sign in ↗'}
-              </button>
-            </form>
-
-            <p className="auth-footnote">Access is limited to approved accounts. There is no public sign-up.</p>
-          </section>
-        </main>
-
-        <footer className="footer auth-footer">
-          <p>Connecting creativity with opportunity.</p>
-          <span>© 2026 TAGX</span>
-        </footer>
-      </div>
-    )
-  }
-
   return (
     <div className="app">
       <header className="navbar">
@@ -280,12 +215,83 @@ const handleCategoryClick = (category) => {
           >
             Explore
           </a>
+          {signedInUser ? (
+            <button className="auth-nav-button" onClick={handleSignOut}>
+              Sign out
+            </button>
+          ) : (
+            <button
+              className="auth-nav-button"
+              onClick={() => {
+                setAuthError('')
+                setShowSignIn(true)
+              }}
+            >
+              Sign in
+            </button>
+          )}
         </nav>
-        <div className="account-actions">
-          <span className="signed-in-label">Signed in</span>
-          <button className="sign-out-button" type="button" onClick={handleSignOut}>Sign out</button>
-        </div>
       </header>
+
+      {showSignIn && (
+        <div
+          className="auth-overlay"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowSignIn(false)
+          }}
+        >
+          <section
+            className="auth-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="signin-heading"
+          >
+            <button
+              className="auth-close-button"
+              type="button"
+              aria-label="Close sign in"
+              onClick={() => setShowSignIn(false)}
+            >
+              ×
+            </button>
+            <p className="eyebrow">TAGX / MEMBER ACCESS</p>
+            <h2 id="signin-heading">Welcome back.</h2>
+            <p className="auth-description">Sign in to your TAGX account.</p>
+
+            <form className="auth-form" onSubmit={handleSignIn}>
+              <label htmlFor="signin-email">Email address</label>
+              <input
+                id="signin-email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+
+              <label htmlFor="signin-password">Password</label>
+              <input
+                id="signin-password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+
+              {authError && <p className="auth-error" role="alert">{authError}</p>}
+
+              <button className="auth-submit-button" type="submit" disabled={authLoading}>
+                {authLoading ? 'Signing in…' : 'Sign in ↗'}
+              </button>
+            </form>
+            <p className="auth-footnote">Use the email and password created for you by TAGX.</p>
+          </section>
+        </div>
+      )}
 
       <main>
         {selectedCreator ? (
@@ -433,7 +439,6 @@ const handleCategoryClick = (category) => {
     Booking and direct messaging will be added in a later phase.
   </p>
 )}
-```
               </div>
             </div>
           </section>

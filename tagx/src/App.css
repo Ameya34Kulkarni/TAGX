@@ -1547,3 +1547,117 @@ input:focus-visible {
   .account-actions { width: 100%; justify-content: space-between; }
   .auth-navbar { flex-wrap: wrap; }
 }
+/* TAGX Sign-in */
+.auth-nav-button {
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: #f4f0e8;
+  color: #151515;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.auth-modal {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background: #111318;
+  color: #f7f5f0;
+}
+
+.auth-modal h2 {
+  margin: 12px 0;
+  font-size: 32px;
+}
+
+.auth-description,
+.auth-footnote {
+  color: #aaa;
+  line-height: 1.6;
+}
+
+.auth-close-button {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.auth-form label {
+  font-size: 14px;
+}
+
+.auth-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid #41434b;
+  border-radius: 6px;
+  outline: none;
+  background: #1a1c22;
+  color: white;
+}
+
+.auth-form input:focus {
+  border-color: #c5b9ff;
+}
+
+.auth-submit-button {
+  margin-top: 10px;
+  padding: 13px;
+  border: none;
+  border-radius: 6px;
+  background: #f4f0e8;
+  color: #151515;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.auth-error {
+  color: #ff9292;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.auth-footnote {
+  margin-top: 18px;
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .auth-modal {
+    padding: 28px 22px;
+  }
+}
