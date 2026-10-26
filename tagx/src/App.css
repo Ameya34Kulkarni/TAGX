@@ -3365,7 +3365,7 @@ input:focus-visible {
   opacity: 0.6;
   cursor: not-allowed;
 }
-```css
+
 /* TAGX: Keep Portraits and Stories visible on mobile */
 @media screen and (max-width: 600px) {
   .hero-art {
@@ -3416,4 +3416,3 @@ input:focus-visible {
     gap: 24px;
   }
 }
-```
